@@ -25,16 +25,27 @@ of naming the columns
 
 '''
 
+# Useful functions
+
 def angular_separation (ra1, ra2, dec1, dec2): #from https://www.skythisweek.info/angsep.pdf
+    '''
+    Returns angular separation for two sources (1 and 2) given their ra and dec
+    '''
     prefactor = 180/np.pi
     numerator = np.sqrt(np.cos(dec2)*(np.sin(ra2-ra1))**2+(np.cos(dec1)*np.sin(dec2)-np.sin(dec1)*np.cos(dec2)*np.cos(ra2-ra1))**2)
     denominator = np.sin(dec1)*np.sin(dec2) + np.cos(dec1)*np.cos(dec2)*np.cos(ra2-ra1)
     return prefactor * np.arctan(numerator/denominator)
 
-#%% XID
-#Input coordinates of source - THIS IS NOT THE SAME AS IN THE NEXT CODE CELLS BECAUSE THE SOURCE WE CHOSE IS NOT IN THE CATALOGUE
-ra = '17h40m31s'
-dec = '+68d53m48s'
+
+def from_deg_to_hmsdms (ra, dec): #in degrees, as in the catalogue
+    coordinates = SkyCoord(ra, dec, frame=FK5, unit = 'deg') # in degrees
+    return coordinates.to_string('hmsdms')
+
+#%% SELECT SOURCE
+
+#Input coordinates of source 
+ra = '17h39m45.2568s'
+dec = '+68d50m15.1044s'
 print('Initial coordinates:', ra, dec)
 
 # Convert to degrees
@@ -42,12 +53,15 @@ coordinates = SkyCoord(ra, dec, frame=FK5)
 ra = coordinates.ra.degree
 dec = coordinates.dec.degree
 
+
+#%% XID
+
 # Import catalogue and ra and dec columns 
 catalogue = pd.read_csv('/Users/claraaldegundemanteca/Desktop/Herschel Field/Chris_SPIREdarkfield/catalogues/XID_multiband.csv')
 ra_catalogue = catalogue ['RA']
 dec_catalogue = catalogue ['Dec']
 
-# Find ID
+# Find ID: need separate functions foreach catalogue because they're labelled differently
 def find_source (ra_catalogue, dec_catalogue):
     '''
     Parameters
@@ -66,26 +80,26 @@ def find_source (ra_catalogue, dec_catalogue):
     separation_array = np.array(separation_list)
     index = np .where (np.min(separation_array) == separation_array)[0]
     coordinates_in_catalogue = SkyCoord(ra_catalogue[index], dec_catalogue[index], frame=FK5, unit = 'deg') # in degrees
-    print(coordinates_in_catalogue)
     # print(coordinates)
-    # print(ra_catalogue[index], dec_catalogue[index])
+    print(ra_catalogue[index], dec_catalogue[index])
     coordinates_in_catalogue = coordinates_in_catalogue.to_string('hmsdms') # convert to hmsdms for comparison
     print('Coordinates, to compare with DS9',coordinates_in_catalogue)
-    return index 
+    return index, catalogue['PSW Flux (mJy)'][i], catalogue['PSW Flux Err (mJy)'][i], catalogue['PMW Flux (mJy)'][i], catalogue['PMW Flux Err (mJy)'][i], catalogue['PLW Flux (mJy)'][i], catalogue['PLW Flux Err (mJy)'][i], catalogue['MIPS24 Flux (mJy)'][i], catalogue['MIPS24 Flux Err (mJy)'][i]
 
 print(find_source (ra_catalogue, dec_catalogue))
 
+find_source_XID = find_source(ra_catalogue, dec_catalogue)
+
+PSW_flux_XID = find_source_XID[1]
+PSW_flux_err_XID   = find_source_XID[2]
+PMW_flux_XID  = find_source_XID [3]
+PMW_flux_err_XID   = find_source_XID[4]
+PLW_flux_XID = find_source_XID[5]
+PLW_flux_err_XID = find_source_XID[6]
+MIPS24_flux_XID = find_source_XID[7]
+MIPS24_flux_err_XID = find_source_XID[8]
+
 #%%  IRAC
-
-#Input coordinates of source
-ra = '17h39m29s'
-dec = '+68d47m51s'
-print('Initial coordinates:', ra, dec)
-
-# Convert to degrees
-coordinates = SkyCoord(ra, dec, frame=FK5)
-ra = coordinates.ra.degree
-dec = coordinates.dec.degree
 
 # Import catalogue 
 catalogue = pd.read_csv('/Users/claraaldegundemanteca/Desktop/Herschel Field/Chris_SPIREdarkfield/catalogues/IRACdark-matched.csv', low_memory=False)
@@ -94,7 +108,6 @@ catalogue = pd.read_csv('/Users/claraaldegundemanteca/Desktop/Herschel Field/Chr
 ra_catalogue = catalogue ['ra']
 dec_catalogue = catalogue ['dec']
 
-
 # Find ID
 def find_source (ra_catalogue, dec_catalogue):
     '''
@@ -116,7 +129,7 @@ def find_source (ra_catalogue, dec_catalogue):
     coordinates_in_catalogue = SkyCoord(ra_catalogue[index], dec_catalogue[index], frame=FK5, unit = 'deg') # in degrees
     print(coordinates_in_catalogue)
     # print(coordinates)
-    # print(ra_catalogue[index], dec_catalogue[index])
+    print(ra_catalogue[index], dec_catalogue[index])
     coordinates_in_catalogue = coordinates_in_catalogue.to_string('hmsdms') # convert to hmsdms for comparison
     print('Coordinates, to compare with DS9',coordinates_in_catalogue)
     return index,  catalogue['irac1flux'][i], catalogue['irac1fluxerr'][i], catalogue['irac2flux'][i], catalogue['irac2fluxerr'][i], catalogue['irac3flux'][i], catalogue['irac3fluxerr'][i], catalogue['irac4flux'][i], catalogue['irac4fluxerr'][i]
@@ -137,15 +150,6 @@ IRAC4_flux_err_IRAC = find_source_IRAC [8]
 
 #%% SUSSEXtractor
 
-#Input coordinates of source
-ra = '17h39m29s'
-dec = '+68d47m51s'
-print('Initial coordinates:', ra, dec)
-
-# Convert to degrees
-coordinates = SkyCoord(ra, dec, frame=FK5)
-ra = coordinates.ra.degree
-dec = coordinates.dec.degree
 
 # Import catalogue 
 catalogue = pd.read_csv('/Users/claraaldegundemanteca/Desktop/Herschel Field/Chris_SPIREdarkfield/catalogues/SUSSEXtractor_multiband_full_singlepos.csv', low_memory=False)
@@ -178,9 +182,9 @@ def find_source (ra_catalogue, dec_catalogue):
     # print(ra_catalogue[index], dec_catalogue[index])
     coordinates_in_catalogue = coordinates_in_catalogue.to_string('hmsdms') # convert to hmsdms for comparison
     # print('Coordinates, to compare with DS9',coordinates_in_catalogue)
-    return index, catalogue['PSW Flux (mJy)'][i], catalogue['PSW Flux Err (mJy)'][i], catalogue['PMW Flux (mJy)'][i], catalogue['PMW Flux Err (mJy)'][i], catalogue['PLW Flux (mJy)'][i], catalogue['PLW Flux Err (mJy)'][i] #returns index, fluxes and errors
+    return index, catalogue['PSW Flux (mJy)'][index], catalogue['PSW Flux Err (mJy)'][index], catalogue['PMW Flux (mJy)'][index], catalogue['PMW Flux Err (mJy)'][index], catalogue['PLW Flux (mJy)'][index], catalogue['PLW Flux Err (mJy)'][index] #returns index, fluxes and errors
 
-print(find_source (ra_catalogue, dec_catalogue))
+# print(find_source (ra_catalogue, dec_catalogue))
 
 find_source_SUSSEX = find_source(ra_catalogue, dec_catalogue)
 
@@ -201,16 +205,21 @@ filter4: IRAC1_flux_IRAC
 filter5: IRAC2_flux_IRAC
 filter6: IRAC3_flux_IRAC
 filter7: IRAC4_flux_IRAC
+filter8: PSW_flux_XID
+filter9: PMW_flux_XID
+filter10: PLW_flux_XID
+filter11: MIPS24_flux_XID
 '''
 
 d = {'filter1': PSW_flux_SUSSEX, 'filter1_err': PSW_flux_err_SUSSEX, 'filter2': PMW_flux_SUSSEX, 'filter2_err': PMW_flux_err_SUSSEX, \
      'filter3': PLW_flux_SUSSEX, 'filter3_err': PLW_flux_err_SUSSEX, 'filter4':IRAC1_flux_IRAC, 'filter4_err':IRAC1_flux_err_IRAC, \
     'filter5':IRAC2_flux_IRAC, 'filter5_err':IRAC2_flux_err_IRAC, 'filter6':IRAC3_flux_IRAC, 'filter6_err':IRAC3_flux_err_IRAC,\
-    'filter7':IRAC4_flux_IRAC, 'filter7_err':IRAC4_flux_err_IRAC}
+    'filter7':IRAC4_flux_IRAC, 'filter7_err':IRAC4_flux_err_IRAC,'filter8': PSW_flux_XID, 'filter8_err': PSW_flux_err_XID, 'filter9': PMW_flux_XID,\
+    'filter9_err': PMW_flux_err_XID, 'filter10': PLW_flux_XID, 'filter10_err': PLW_flux_err_XID, 'filter11': MIPS24_flux_XID, 'filter11_err': MIPS24_flux_err_XID}
 
 
 # Create dataframe
-df = pd.DataFrame(data=d, index=[0])
+df = pd.DataFrame(data=d)
 
 # Convert to txt
 df.to_csv(r'/Users/claraaldegundemanteca/Desktop/Herschel Field/Chris_SPIREdarkfield/CIGALE_input.txt')
