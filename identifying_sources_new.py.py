@@ -33,13 +33,19 @@ def from_deg_to_hmsdms (ra, dec): #in degrees, as in the catalogue
     coordinates = SkyCoord(ra, dec, frame=FK5, unit = 'deg') # in degrees
     return coordinates.to_string('hmsdms')
 
+def from_m_to_F (F0, m):
+    '''
+    Given a magnitude m and zero magnitude flux F0, flux F is calculated (in the units of F0)
+    '''
+    return F0*10**(-m/2.5)
+
 #%% SELECT SOURCE
 
 #Input coordinates of source 
-#ra = '17h40m31.99s'
-#dec = '+68d53m48.77s'
-ra = '17h40m49.67s'
-dec = '+68d52m10.14s'
+#ID 5
+ra = '17h39m45.2568s'
+dec = ' +68d50m15.072s'
+
 print('Initial coordinates:', ra, dec)
 
 # Convert to degrees
@@ -50,9 +56,8 @@ dec = coordinates.dec.degree
 
 #%% SUSSEXtractor
 
-
 # Import catalogue 
-catalogue = pd.read_csv('data\spiredarkfield_2023-10-11\SPIREdarkfield\catalogues\SUSSEXtractor_multiband_full_singlepos.csv', low_memory=False)
+catalogue = pd.read_csv('/Users/claraaldegundemanteca/Desktop/HerschelField/Chris_SPIREdarkfield/catalogues/SUSSEXtractor_multiband_full_singlepos.csv', low_memory=False)
 
 # Select the ra and dec columns from the catalogue
 ra_catalogue = catalogue ['RA']
@@ -88,7 +93,7 @@ print(find_source (ra_catalogue, dec_catalogue))
 
 find_source_SUSSEX = find_source(ra_catalogue, dec_catalogue)
 
-PSW_flux_SUSSEX =  find_source_SUSSEX[1]
+PSW_flux_SUSSEX =  find_source_SUSSEX[1] # all of these in mJy
 PSW_flux_err_SUSSEX   = find_source_SUSSEX[2]
 PMW_flux_SUSSEX  = find_source_SUSSEX [3]
 PMW_flux_err_SUSSEX   = find_source_SUSSEX[4]
@@ -99,7 +104,7 @@ PLW_flux_err_SUSSEX = find_source_SUSSEX[6]
 #%%  IRAC
 
 # Import catalogue 
-catalogue = pd.read_csv('data\spiredarkfield_2023-10-11\SPIREdarkfield\catalogues\IRACdark-matched.csv', low_memory=False)
+catalogue = pd.read_csv('/Users/claraaldegundemanteca/Desktop/HerschelField/Chris_SPIREdarkfield/catalogues/IRACdark-matched.csv', low_memory=False)
 
 # Select the ra and dec columns from the catalogue
 ra_catalogue = catalogue ['ra']
@@ -131,38 +136,63 @@ def find_source (ra_catalogue, dec_catalogue):
     # print('Coordinates, to compare with DS9',coordinates_in_catalogue)
     # get redshift
     redshift = catalogue['zphot'].iloc[index]
-    return index, redshift, catalogue['irac1flux'][index], catalogue['irac1fluxerr'][index], catalogue['irac2flux'][index], catalogue['irac2fluxerr'][index], catalogue['irac3flux'][index], catalogue['irac3fluxerr'][index], catalogue['irac4flux'][index], catalogue['irac4fluxerr'][index], catalogue['mips24flux'][index], catalogue['mips24fluxerr'][index], catalogue['mips70flux'][index], catalogue['mips70fluxerr'][index], catalogue['Akariflux11'][index], catalogue['Akarierr11'][index], catalogue['Akariflux15'][index], catalogue['Akarierr15'][index], catalogue['Akariflux18'][index], catalogue['Akarierr18'][index]
+    return index, redshift, catalogue['irac1flux'][index], catalogue['irac1fluxerr'][index], catalogue['irac2flux'][index], \
+        catalogue['irac2fluxerr'][index], catalogue['irac3flux'][index], catalogue['irac3fluxerr'][index], catalogue['irac4flux'][index],\
+        catalogue['irac4fluxerr'][index], catalogue['mips24flux'][index], catalogue['mips24fluxerr'][index], catalogue['mips70flux'][index],\
+        catalogue['mips70fluxerr'][index], catalogue['Akariflux11'][index], catalogue['Akarierr11'][index], catalogue['Akariflux15'][index],\
+        catalogue['Akarierr15'][index], catalogue['Akariflux18'][index], catalogue['Akarierr18'][index], catalogue['umag'][index], \
+        catalogue['umagerr'][index], catalogue['gmag'][index],catalogue['gmagerr'][index], catalogue['rmag'][index], catalogue['rmagerr'][index],\
+        catalogue['zmagbest'][index], catalogue['zmagerrbest'][index]
+
+
+
+
+
 
 print('----', find_source (ra_catalogue, dec_catalogue))
 find_source_IRAC = find_source(ra_catalogue, dec_catalogue)
 
 # Record in format: Instrument_flux_catalogue
 source_redshift = find_source_IRAC[1]
-IRAC1_flux_IRAC =  find_source_IRAC[2]
-IRAC1_flux_err_IRAC = find_source_IRAC[3]
-IRAC2_flux_IRAC = find_source_IRAC[4]
-IRAC2_flux_err_IRAC = find_source_IRAC[5]
-IRAC3_flux_IRAC = find_source_IRAC[6]
-IRAC3_flux_err_IRAC = find_source_IRAC[7]
-IRAC4_flux_IRAC = find_source_IRAC[8]
-IRAC4_flux_err_IRAC = find_source_IRAC[9]
-MIPS24_flux_IRAC = find_source_IRAC[10]
-MIPS24_flux_err_IRAC = find_source_IRAC[11]
 
-# additional filters
-MIPS70_flux_IRAC = find_source_IRAC[12]
-MIPS70_flux_err_IRAC = find_source_IRAC[13]
-S11_flux_AKARI = find_source_IRAC[14]
-S11_flux_err_AKARI = find_source_IRAC[15]
-L15_flux_AKARI = find_source_IRAC[16]
-L15_flux_err_AKARI = find_source_IRAC[17]
-L18W_flux_AKARI = find_source_IRAC[18]
-L18W_flux_err_AKARI = find_source_IRAC[19]
+IRAC1_flux_IRAC =  find_source_IRAC[2]*1e-3 #convert from uJy to mJy
+IRAC1_flux_err_IRAC = find_source_IRAC[3]*1e-3 #convert from uJy to mJy
+IRAC2_flux_IRAC = find_source_IRAC[4]*1e-3 #convert from uJy to mJy
+IRAC2_flux_err_IRAC = find_source_IRAC[5]*1e-3 #convert from uJy to mJy
+IRAC3_flux_IRAC = find_source_IRAC[6]*1e-3 #convert from uJy to mJy
+IRAC3_flux_err_IRAC = find_source_IRAC[7]*1e-3 #convert from uJy to mJy
+IRAC4_flux_IRAC = find_source_IRAC[8]*1e-3 #convert from uJy to mJy
+IRAC4_flux_err_IRAC = find_source_IRAC[9]*1e-3 #convert from uJy to mJy
+
+MIPS24_flux_IRAC = find_source_IRAC[10] *1e-3 #convert from uJy to mJy
+MIPS24_flux_err_IRAC = find_source_IRAC[11]*1e-3 #convert from uJy to mJy
+MIPS70_flux_IRAC = find_source_IRAC[12]*1e-3 #convert from uJy to mJy
+MIPS70_flux_err_IRAC = find_source_IRAC[13]*1e-3 #convert from uJy to mJy
+
+S11_flux_AKARI = find_source_IRAC[14]*1e-3 #convert from uJy to mJy
+S11_flux_err_AKARI = find_source_IRAC[15]*1e-3 #convert from uJy to mJy
+L15_flux_AKARI = find_source_IRAC[16]*1e-3 #convert from uJy to mJy
+L15_flux_err_AKARI = find_source_IRAC[17]*1e-3 #convert from uJy to mJy
+L18W_flux_AKARI = find_source_IRAC[18]*1e-3 #convert from uJy to mJy
+L18W_flux_err_AKARI = find_source_IRAC[19]*1e-3 #convert from uJy to mJy
+
+#Change zero magnitude flux here
+F0 = 3630 #in Jy
+u_flux_IRAC = from_m_to_F(F0, float(find_source_IRAC[20]))*1e3 #convert to flux and then from Jy to mJy
+u_flux_err_IRAC = from_m_to_F(F0, float(find_source_IRAC[21]))*1e3 #convert to flux and then from Jy to mJy
+g_flux_IRAC = from_m_to_F(F0, float(find_source_IRAC[22]))*1e3 #convert to flux and then from Jy to mJy
+g_flux_err_IRAC = from_m_to_F(F0, float(find_source_IRAC[23]))*1e3 #convert to flux and then from Jy to mJy
+r_flux_IRAC = from_m_to_F(F0, float(find_source_IRAC[24]))*1e3 #convert to flux and then from Jy to mJy
+r_flux_err_IRAC = from_m_to_F(F0, float(find_source_IRAC[25]))*1e3 #convert to flux and then from Jy to mJy
+z_flux_IRAC = from_m_to_F(F0, float(find_source_IRAC[26]))*1e3 #convert to flux and then from Jy to mJy
+z_flux_err_IRAC = from_m_to_F(F0, float(find_source_IRAC[27]))*1e3 #convert to flux and then from Jy to mJy
+
 
 #%% XID
 
 # Import catalogue and ra and dec columns 
-catalogue = pd.read_csv('data\spiredarkfield_2023-10-11\SPIREdarkfield\catalogues\XID_multiband.csv')
+catalogue = pd.read_csv('/Users/claraaldegundemanteca/Desktop/HerschelField/Chris_SPIREdarkfield/catalogues/XID_multiband.csv')
+
 ra_catalogue = catalogue ['RA']
 dec_catalogue = catalogue ['Dec']
 
@@ -190,30 +220,34 @@ def find_source (ra_catalogue, dec_catalogue):
     coordinates_in_catalogue = coordinates_in_catalogue.to_string('hmsdms') # convert to hmsdms for comparison
     # print('Coordinates, to compare with DS9',coordinates_in_catalogue)
     # get ID
-    source_id = catalogue['ID'].iloc[index]
-    return index, source_id, catalogue['PSW Flux (mJy)'][index], catalogue['PSW Flux Err (mJy)'][index], catalogue['PMW Flux (mJy)'][index], catalogue['PMW Flux Err (mJy)'][index], catalogue['PLW Flux (mJy)'][index], catalogue['PLW Flux Err (mJy)'][index], catalogue['MIPS24 Flux (mJy)'][index], catalogue['MIPS24 Flux Err (mJy)'][index]
+    # source_id = catalogue['ID'][index]
+    return index, catalogue['ID'][index], catalogue['PSW Flux (mJy)'][index], catalogue['PSW Flux Err (mJy)'][index], catalogue['PMW Flux (mJy)'][index], catalogue['PMW Flux Err (mJy)'][index], catalogue['PLW Flux (mJy)'][index], catalogue['PLW Flux Err (mJy)'][index], catalogue['MIPS24 Flux (mJy)'][index], catalogue['MIPS24 Flux Err (mJy)'][index]
 
 print(find_source (ra_catalogue, dec_catalogue))
 
 find_source_XID = find_source(ra_catalogue, dec_catalogue)
 
 source_id = find_source_XID[1]
-PSW_flux_XID = find_source_XID[2]
+
+PSW_flux_XID = find_source_XID[2] #in mJy
 PSW_flux_err_XID   = find_source_XID[3]
 PMW_flux_XID  = find_source_XID [4]
 PMW_flux_err_XID   = find_source_XID[5]
 PLW_flux_XID = find_source_XID[6]
 PLW_flux_err_XID = find_source_XID[7]
-MIPS24_flux_XID = find_source_XID[8]
-MIPS24_flux_err_XID = find_source_XID[9]
+
+MIPS24_flux_XID = find_source_XID[8]*1e-3 #convert from uJy to mJy
+MIPS24_flux_err_XID = find_source_XID[9]*1e-3 #convert from uJy to mJy
 
 #%% CREATE A TXT FILE
 
 
 # Create dataframe
-df = source_id.to_frame(name='id')
+df = source_id.to_frame(name='id')  # BEWARE! ID is from XID catalogue
 df['redshift'] = float(source_redshift)
 
+
+## Add SUSSEXtractor catalogue
 #df['PSW'] = float(PSW_flux_SUSSEX)
 #df['PSW_err'] = float(PSW_flux_err_SUSSEX)
 
@@ -223,6 +257,7 @@ df['redshift'] = float(source_redshift)
 #df['PLW'] = float(PLW_flux_SUSSEX)
 #df['PLW_err'] = float(PLW_flux_err_SUSSEX)
 
+# Add IRAC catalogue
 if float(IRAC1_flux_IRAC) != -99. and float(IRAC1_flux_IRAC) != -1. and float(IRAC1_flux_err_IRAC) != -99. and float(IRAC1_flux_err_IRAC) != -1.:
     df['IRAC1'] = float(IRAC1_flux_IRAC)
     df['IRAC1_err'] = float(IRAC1_flux_err_IRAC)
@@ -242,20 +277,7 @@ if float(IRAC4_flux_IRAC) != -99. and float(IRAC4_flux_IRAC) != -1. and float(IR
 #df['MIPS1'] = float(MIPS24_flux_IRAC)
 #df['MIPS1_err'] = float(MIPS24_flux_err_IRAC)
 
-df['PSW'] =  float(PSW_flux_XID)
-df['PSW_err'] =  float(PSW_flux_err_XID)
-
-df['PMW'] =  float(PMW_flux_XID)
-df['PMW_err'] =  float(PMW_flux_err_XID)
-
-df['PLW'] =  float(PLW_flux_XID)
-df['PLW_err'] =  float(PLW_flux_err_XID)
-
-df['MIPS1'] = float(MIPS24_flux_XID)
-df['MIPS1_err'] = float(MIPS24_flux_err_XID)
-
 # Add other filters from IRAC catalogue if available
-
 if float(MIPS70_flux_IRAC) != -99. and float(MIPS70_flux_err_IRAC) != -99.:
     df['MIPS2'] = float(MIPS70_flux_IRAC)
     df['MIPS2_err'] = float(MIPS70_flux_err_IRAC)
@@ -275,9 +297,34 @@ if float(L15_flux_AKARI) != 0. and float(L15_flux_err_AKARI) != 0:
 if float(S11_flux_AKARI) != 0. and float(S11_flux_err_AKARI) != 0:
     df['S11'] = float(S11_flux_AKARI)
     df['S11_err'] = float(S11_flux_err_AKARI)
+    
+# Visible
+df['MCam_u'] =  float(u_flux_IRAC)
+df['MCam_u_err'] =  float(u_flux_err_IRAC)
+df['MCam_g'] =  float(g_flux_IRAC)
+df['MCam_g_err'] =  float(g_flux_err_IRAC)
+df['MCam_r'] =  float(r_flux_IRAC)
+df['MCam_r_err'] =  float(r_flux_err_IRAC)
+df['MCam_z'] =  float(z_flux_IRAC)
+df['MCam_z_err'] =  float(z_flux_err_IRAC)
+
+
+# Add XID catalogue
+df['PSW'] =  float(PSW_flux_XID)
+df['PSW_err'] =  float(PSW_flux_err_XID)
+
+df['PMW'] =  float(PMW_flux_XID)
+df['PMW_err'] =  float(PMW_flux_err_XID)
+
+df['PLW'] =  float(PLW_flux_XID)
+df['PLW_err'] =  float(PLW_flux_err_XID)
+
+df['MIPS1'] = float(MIPS24_flux_XID)
+df['MIPS1_err'] = float(MIPS24_flux_err_XID)
+
 
 # Convert to txt
-df.to_csv(r'input.txt', sep=' ', index=False)
+df.to_csv(r'/Users/claraaldegundemanteca/Desktop/CIGALE/cigale-v2022.1/input.txt', sep=' ', index=False)
 
 # add hashtag
 f = open('input.txt', 'r+')
@@ -289,4 +336,3 @@ f.writelines(lines[1:])
 f.truncate()
 f.close()
 
-# %%
