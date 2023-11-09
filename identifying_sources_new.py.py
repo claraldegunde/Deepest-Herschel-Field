@@ -43,8 +43,12 @@ def from_m_to_F (F0, m):
 
 #Input coordinates of source 
 #ID 5
-ra = '17h39m45.2568s'
-dec = ' +68d50m15.072s'
+# ra = '17h39m45.2568s'
+# dec = ' +68d50m15.072s'
+
+ra = '17h41m29.1186s'
+dec = ' +68d57m28.816s'
+
 
 print('Initial coordinates:', ra, dec)
 
@@ -86,7 +90,7 @@ def find_source (ra_catalogue, dec_catalogue):
     # print(coordinates)
     # print(ra_catalogue[index], dec_catalogue[index])
     coordinates_in_catalogue = coordinates_in_catalogue.to_string('hmsdms') # convert to hmsdms for comparison
-    # print('Coordinates, to compare with DS9',coordinates_in_catalogue)
+    print('Coordinates, to compare with DS9',coordinates_in_catalogue)
     return index, catalogue['PSW Flux (mJy)'][index], catalogue['PSW Flux Err (mJy)'][index], catalogue['PMW Flux (mJy)'][index], catalogue['PMW Flux Err (mJy)'][index], catalogue['PLW Flux (mJy)'][index], catalogue['PLW Flux Err (mJy)'][index] #returns index, fluxes and errors
 
 print(find_source (ra_catalogue, dec_catalogue))
@@ -133,7 +137,7 @@ def find_source (ra_catalogue, dec_catalogue):
     # print(coordinates)
     print(ra_catalogue[index], dec_catalogue[index])
     coordinates_in_catalogue = coordinates_in_catalogue.to_string('hmsdms') # convert to hmsdms for comparison
-    # print('Coordinates, to compare with DS9',coordinates_in_catalogue)
+    print('Coordinates, to compare with DS9',coordinates_in_catalogue)
     # get redshift
     redshift = catalogue['zphot'].iloc[index]
     return index, redshift, catalogue['irac1flux'][index], catalogue['irac1fluxerr'][index], catalogue['irac2flux'][index], \
@@ -218,7 +222,7 @@ def find_source (ra_catalogue, dec_catalogue):
     # print(coordinates)
     # print(ra_catalogue[index], dec_catalogue[index])
     coordinates_in_catalogue = coordinates_in_catalogue.to_string('hmsdms') # convert to hmsdms for comparison
-    # print('Coordinates, to compare with DS9',coordinates_in_catalogue)
+    print('Coordinates, to compare with DS9',coordinates_in_catalogue)
     # get ID
     # source_id = catalogue['ID'][index]
     return index, catalogue['ID'][index], catalogue['PSW Flux (mJy)'][index], catalogue['PSW Flux Err (mJy)'][index], catalogue['PMW Flux (mJy)'][index], catalogue['PMW Flux Err (mJy)'][index], catalogue['PLW Flux (mJy)'][index], catalogue['PLW Flux Err (mJy)'][index], catalogue['MIPS24 Flux (mJy)'][index], catalogue['MIPS24 Flux Err (mJy)'][index]
@@ -299,14 +303,21 @@ if float(S11_flux_AKARI) != 0. and float(S11_flux_err_AKARI) != 0:
     df['S11_err'] = float(S11_flux_err_AKARI)
     
 # Visible
-df['sdss.up'] =  float(u_flux_IRAC)
-df['sdss.up_err'] =  float(u_flux_err_IRAC)
-df['sdss.gp'] =  float(g_flux_IRAC)
-df['sdss.gp_err'] =  float(g_flux_err_IRAC)
-df['sdss.rp'] =  float(r_flux_IRAC)
-df['sdss.rp_err'] =  float(r_flux_err_IRAC)
-df['sdss.zp'] =  float(z_flux_IRAC)
-df['sdss.zp_err'] =  float(z_flux_err_IRAC)
+if float(u_flux_IRAC) != -99. and float(u_flux_IRAC) != -1. and float(u_flux_err_IRAC) != -99. and float(u_flux_err_IRAC) != -1.:
+    df['sdss.up'] =  float(u_flux_IRAC)
+    df['sdss.up_err'] =  float(u_flux_err_IRAC)
+
+if float(g_flux_IRAC) != -99. and float(g_flux_IRAC) != -1. and float(g_flux_err_IRAC) != -99. and float(g_flux_err_IRAC) != -1.:
+    df['sdss.gp'] =  float(g_flux_IRAC)
+    df['sdss.gp_err'] =  float(g_flux_err_IRAC)
+
+if float(r_flux_IRAC) != -99. and float(r_flux_IRAC) != -1. and float(r_flux_err_IRAC) != -99. and float(r_flux_err_IRAC) != -1.:
+    df['sdss.rp'] =  float(r_flux_IRAC)
+    df['sdss.rp_err'] =  float(r_flux_err_IRAC)
+
+if float(z_flux_IRAC) != -99. and float(z_flux_IRAC) != -1. and float(z_flux_err_IRAC) != -99. and float(z_flux_err_IRAC) != -1.:
+    df['sdss.zp'] =  float(z_flux_IRAC)
+    df['sdss.zp_err'] =  float(z_flux_err_IRAC)
 
 # df['MCam_u'] =  float(u_flux_IRAC)
 # df['MCam_u_err'] =  float(u_flux_err_IRAC)
