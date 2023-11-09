@@ -179,13 +179,13 @@ L18W_flux_err_AKARI = find_source_IRAC[19]*1e-3 #convert from uJy to mJy
 #Change zero magnitude flux here
 F0 = 3630 #in Jy
 u_flux_IRAC = from_m_to_F(F0, float(find_source_IRAC[20]))*1e3 #convert to flux and then from Jy to mJy
-u_flux_err_IRAC = from_m_to_F(F0, float(find_source_IRAC[21]))*1e3 #convert to flux and then from Jy to mJy
+u_flux_err_IRAC = u_flux_IRAC *(float(find_source_IRAC[21])/float(find_source_IRAC[20]))* (float(find_source_IRAC[21])/2.5) #convert to flux and then from Jy to mJy
 g_flux_IRAC = from_m_to_F(F0, float(find_source_IRAC[22]))*1e3 #convert to flux and then from Jy to mJy
-g_flux_err_IRAC = from_m_to_F(F0, float(find_source_IRAC[23]))*1e3 #convert to flux and then from Jy to mJy
+g_flux_err_IRAC = g_flux_IRAC *(float(find_source_IRAC[23])/float(find_source_IRAC[22])* (float(find_source_IRAC[23])/2.5))  #convert to flux and then from Jy to mJy
 r_flux_IRAC = from_m_to_F(F0, float(find_source_IRAC[24]))*1e3 #convert to flux and then from Jy to mJy
-r_flux_err_IRAC = from_m_to_F(F0, float(find_source_IRAC[25]))*1e3 #convert to flux and then from Jy to mJy
+r_flux_err_IRAC =  r_flux_IRAC *(float(find_source_IRAC[25])/float(find_source_IRAC[24]))* (float(find_source_IRAC[25])/2.5)  #convert to flux and then from Jy to mJy
 z_flux_IRAC = from_m_to_F(F0, float(find_source_IRAC[26]))*1e3 #convert to flux and then from Jy to mJy
-z_flux_err_IRAC = from_m_to_F(F0, float(find_source_IRAC[27]))*1e3 #convert to flux and then from Jy to mJy
+z_flux_err_IRAC = z_flux_IRAC*(float(find_source_IRAC[27])/float(find_source_IRAC[26]))* (float(find_source_IRAC[27])/2.5)  #convert to flux and then from Jy to mJy
 
 
 #%% XID
@@ -299,14 +299,23 @@ if float(S11_flux_AKARI) != 0. and float(S11_flux_err_AKARI) != 0:
     df['S11_err'] = float(S11_flux_err_AKARI)
     
 # Visible
-df['MCam_u'] =  float(u_flux_IRAC)
-df['MCam_u_err'] =  float(u_flux_err_IRAC)
-df['MCam_g'] =  float(g_flux_IRAC)
-df['MCam_g_err'] =  float(g_flux_err_IRAC)
-df['MCam_r'] =  float(r_flux_IRAC)
-df['MCam_r_err'] =  float(r_flux_err_IRAC)
-df['MCam_z'] =  float(z_flux_IRAC)
-df['MCam_z_err'] =  float(z_flux_err_IRAC)
+df['sdss.up'] =  float(u_flux_IRAC)
+df['sdss.up_err'] =  float(u_flux_err_IRAC)
+df['sdss.gp'] =  float(g_flux_IRAC)
+df['sdss.gp_err'] =  float(g_flux_err_IRAC)
+df['sdss.rp'] =  float(r_flux_IRAC)
+df['sdss.rp_err'] =  float(r_flux_err_IRAC)
+df['sdss.zp'] =  float(z_flux_IRAC)
+df['sdss.zp_err'] =  float(z_flux_err_IRAC)
+
+# df['MCam_u'] =  float(u_flux_IRAC)
+# df['MCam_u_err'] =  float(u_flux_err_IRAC)
+# df['MCam_g'] =  float(g_flux_IRAC)
+# df['MCam_g_err'] =  float(g_flux_err_IRAC)
+# df['MCam_r'] =  float(r_flux_IRAC)
+# df['MCam_r_err'] =  float(r_flux_err_IRAC)
+# df['MCam_z'] =  float(z_flux_IRAC)
+# df['MCam_z_err'] =  float(z_flux_err_IRAC)
 
 
 # Add XID catalogue
