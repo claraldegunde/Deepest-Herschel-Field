@@ -204,17 +204,25 @@ def find_source_XID(catalogue, ra, dec):
 
 def CIGALE_input(cat_SUSSEX_path, cat_IRAC_path, cat_XID_path, sources, outputfile):
     '''
-
+    Produces a dataframe containing the necessary info to perform a fit in CIGALE (id, redshift and fluxes for each filter) and converts is to a .txt file.
+    
     Parameters
     ----------
     cat_SUSSEX_path : string
-
+        path to SUSSEXtrcator catalogue (.csv file)
     cat_IRAC_path : string
-
+        path to IRAC dark-matched catalogue (.csv file)
     cat_XID_path : string
+        path to XID multiband catalogue (.csv file)
+    sources : 2 x N list of strings
+        ra-dec positions of the sources to retrieve fluxes from in hhmmss
+    outputfile : string
+        name of the output file (.txt file)
 
-    sources : list of tuples
-    
+    Returns
+    -------
+    d: pandas DataFrame object
+        data table containing the info to feed into CIGALE (id, redshift and fluxes for each filter)
     '''
 
     # import catalogues
