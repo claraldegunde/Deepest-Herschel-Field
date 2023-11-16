@@ -134,6 +134,23 @@ def find_source_IRAC(catalogue, ra, dec):
     z_flux = (from_m_to_F(F0, float(catalogue['zmagbest'].iloc[index])))*1e3
     z_flux_err = z_flux*(float(catalogue['zmagerrbest'].iloc[index])/float(catalogue['zmagbest'].iloc[index])) * (float(catalogue['zmagerrbest'].iloc[index])/2.5)
 
+    # filter out non-detections
+    if float(catalogue['umagerr'].iloc[index]) <= 0. or float(catalogue['umagerr'].iloc[index]) == 99:
+        u_flux_err = 0.1*u_flux
+    if float(catalogue['umag'].iloc[index]) <= 0. or float(catalogue['umag'].iloc[index]) == 99:
+        u_flux = 0.
+        u_flux_err = 0.
+    if float(catalogue['gmagerr'].iloc[index]) <= 0. or float(catalogue['gmagerr'].iloc[index]) == 99:
+        g_flux_err = 0.1*g_flux
+    if float(catalogue['gmag'].iloc[index]) <= 0. or float(catalogue['gmag'].iloc[index]) == 99:
+        g_flux = 0.
+        g_flux_err = 0.
+    if float(catalogue['zmagerrbest'].iloc[index]) <= 0. or float(catalogue['zmagerrbest'].iloc[index]) == 99:
+        z_flux_err = 0.1*u_flux
+    if float(catalogue['zmagbest'].iloc[index]) <= 0. or float(catalogue['zmagbest'].iloc[index]) == 99:
+        z_flux = 0.
+        z_flux_err = 0.
+    
     fluxes = [(catalogue['irac1flux'].iloc[index])*1e-3, (catalogue['irac1fluxerr'].iloc[index])*1e-3, 
               (catalogue['irac2flux'].iloc[index])*1e-3, (catalogue['irac2fluxerr'][index])*1e-3, 
               (catalogue['irac3flux'].iloc[index])*1e-3, (catalogue['irac3fluxerr'].iloc[index])*1e-3, 
