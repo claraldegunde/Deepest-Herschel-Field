@@ -316,25 +316,29 @@ def CIGALE_input(cat_SUSSEX_path, cat_IRAC_path, cat_XID_path, sources, outputfi
 # %%
 
 # TEST MAKE FILE
-positions = [['17h39m45.26s', '+68d50m15.07s'],
-             ['17h40m31.99s', '+68d53m48.77s'],
-             ['17h40m12.06s', '+69d00m18.18s'],
-             ['17h37m42.53s', '+68d40m36.21s'],
-             ['17h43m19.85s', '+68d45m42.32s'],
-             ['17h41m28.00s', '+68d57m28.18s'],
-             ['17h43m08.39s', '+69d00m31.13s'],
-             ['17h39m21.58s', '+69d07m36.93s'],
-             ['17h38m38.41s', '+69d16m32.03s'],
-             ['17h43m17.33s', '+69d19m38.11s'],
-             ['17h38m02.19s', '+69d02m58.27s'],
-             ['17h37m29.56s', '+69d12m18.29s'],
-             ['17h36m41.95s', '+68d41m04.39s'],
-             ['17h41m05.24s', '+69d10m11.45s'],
-             ['17h37m52.30s', '+68d54m39.51s']]
+
+# positions = [['17h39m45.26s', '+68d50m15.07s'],
+#              ['17h40m31.99s', '+68d53m48.77s'],
+#              ['17h40m12.06s', '+69d00m18.18s'],
+#              ['17h37m42.53s', '+68d40m36.21s'],
+#              ['17h43m19.85s', '+68d45m42.32s'],
+#              ['17h41m28.00s', '+68d57m28.18s'],
+#              ['17h43m08.39s', '+69d00m31.13s'],
+#              ['17h39m21.58s', '+69d07m36.93s'],
+#              ['17h38m38.41s', '+69d16m32.03s'],
+#              ['17h43m17.33s', '+69d19m38.11s'],
+#              ['17h38m02.19s', '+69d02m58.27s'],
+#              ['17h37m29.56s', '+69d12m18.29s'],
+#              ['17h36m41.95s', '+68d41m04.39s'],
+#              ['17h41m05.24s', '+69d10m11.45s'],
+#              ['17h37m52.30s', '+68d54m39.51s']]
+
+# input the position of the source(s) you want  to look at in hmsdms format
+positions = [[]] 
 
 sources = CIGALE_input('data\spiredarkfield_2023-10-11\SPIREdarkfield\catalogues\SUSSEXtractor_multiband_full_singlepos.csv',
                        'data\spiredarkfield_2023-10-11\SPIREdarkfield\catalogues\IRACdark-matched.csv',
                        'data\spiredarkfield_2023-10-11\SPIREdarkfield\catalogues\XID_multiband.csv',
-                        positions, 'brightsources.txt')
+                        positions, 'input.txt')
 
 # %%
