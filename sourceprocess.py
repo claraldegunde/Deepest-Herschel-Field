@@ -28,6 +28,8 @@ import numpy as np
 
 import pandas as pd
 
+import matplotlib.pyplot as plt
+
 from astropy.coordinates import SkyCoord, FK5
 
 
@@ -103,7 +105,7 @@ def ang_sep(ra1, ra2, dec1, dec2):
     pref = 180/np.pi
     num = np.sqrt(np.cos(dec2)*(np.sin(ra2-ra1))**2 + (np.cos(dec1)*np.sin(dec2)-np.sin(dec1)*np.cos(dec2)*np.cos(ra2-ra1))**2)
     denom = np.sin(dec1)*np.sin(dec2) + np.cos(dec1)*np.cos(dec2)*np.cos(ra2-ra1)
-    sep = pref * np.arctan(num/denom)
+    sep = np.abs(pref * np.arctan(num/denom))
 
     return sep
 
@@ -174,6 +176,10 @@ class Source:
         if type(ra) == float and type(dec) == float:
             self.ra = ra
             self.dec = dec
+        
+        elif type(ra) == np.float64 and type(dec) == np.float64:
+            self.ra = float(ra)
+            self.dec = float(dec)
 
         elif type(ra) == str and type(dec) == str:
             c_deg = from_hmsdms_to_deg(ra, dec)
@@ -196,18 +202,15 @@ class Source:
 
         data = cat.data
 
-        ra_col = data[cat.columns[1]]
-        dec_col = data[cat.columns[2]]
+        ra_col = data[cat.columns[2]]
+        dec_col = data[cat.columns[3]]
         sep_list = []
         for i in range (0, len(ra_col)):
             sep_list.append(ang_sep(self.ra, ra_col[i], self.dec, dec_col[i]))
-            sep_arr= np.array(sep_list)
-            index = np.where(np.min(sep_arr) == sep_arr)[0][0]
-        
-        self.id = data[cat.columns[0]].iloc[index]
-    
-    #def get_redshift(self, cat):
+        sep_arr = np.array(sep_list)
+        index = np.where(np.min(sep_arr) == sep_arr)[0][0]
 
+        self.id = data[cat.columns[0]].iloc[index]
 
     def get_fluxes(self, cat):
         '''
@@ -238,8 +241,8 @@ class Source:
                 sep_list = []
                 for i in range (0, len(ra_col)):
                     sep_list.append(ang_sep(self.ra, ra_col[i], self.dec, dec_col[i]))
-                    sep_arr= np.array(sep_list)
-                    index = np.where(np.min(sep_arr) == sep_arr)[0][0]
+                sep_arr= np.array(sep_list)
+                index = np.where(np.min(sep_arr) == sep_arr)[0][0]
 
                 newfluxes = (data.iloc[index]).loc[:, cat.columns[4]:]
                 self.fluxes = pd.concat([self.fluxes, newfluxes], axis=1)
@@ -275,8 +278,8 @@ class Source:
                 sep_list = []
                 for i in range (0, len(ra_col)):
                     sep_list.append(ang_sep(self.ra, ra_col[i], self.dec, dec_col[i]))
-                    sep_arr= np.array(sep_list)
-                    index = np.where(np.min(sep_arr) == sep_arr)[0][0]
+                sep_arr= np.array(sep_list)
+                index = np.where(np.min(sep_arr) == sep_arr)[0][0]
 
                 self.fluxes = data.iloc[index]
                 self.id = data[data.columns[0]].iloc[index]
