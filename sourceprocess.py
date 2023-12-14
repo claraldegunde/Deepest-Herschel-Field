@@ -23,7 +23,7 @@ ang_sep
 
 """
 
-
+# %%
 import numpy as np
 
 import pandas as pd
@@ -208,7 +208,7 @@ class Source:
         for i in range (0, len(ra_col)):
             sep_list.append(ang_sep(self.ra, ra_col[i], self.dec, dec_col[i]))
         sep_arr = np.array(sep_list)
-        index = np.where(np.min(sep_arr) == sep_arr)[0][0]
+        index = np.where(np.nanmin(sep_arr) == sep_arr)[0][0]
 
         self.id = data[cat.columns[0]].iloc[index]
 
@@ -232,28 +232,19 @@ class Source:
 
             data = cat.data
 
-            # find source from position (closest in catalogue)
-            if self.id == None:
-                    
-                # find source from position (closest in catalogue)
-                ra_col = data[cat.columns[2]]
-                dec_col = data[cat.columns[3]]
-                sep_list = []
-                for i in range (0, len(ra_col)):
-                    sep_list.append(ang_sep(self.ra, ra_col[i], self.dec, dec_col[i]))
-                sep_arr= np.array(sep_list)
-                index = np.where(np.min(sep_arr) == sep_arr)[0][0]
-
-                newfluxes = (data.iloc[index]).loc[:, cat.columns[4]:]
-                self.fluxes = pd.concat([self.fluxes, newfluxes], axis=1)
-
-
             # find source from id
-            else:
+            if hasattr(self, 'id'):
 
                 newfluxes = (data[data[cat.columns[0]] == self.id]).loc[:, cat.columns[4]:]
-                newfluxes = newfluxes.set_index(pd.Index([int(self.id)]))
-                self.fluxes = pd.concat([self.fluxes, newfluxes], axis=1)
+                
+                # break here if id no matching id found in catalogue
+                if newfluxes.shape[0] == 0:
+                    statement = 'No fluxes found in ' + cat.name + 'catalogue.'
+                    print(statement)
+                
+                else:
+                    newfluxes = newfluxes.set_index(pd.Index([int(self.id)]))
+                    self.fluxes = pd.concat([self.fluxes, newfluxes], axis=1)
 
         # initialise fluxes
         else:
@@ -273,6 +264,7 @@ class Source:
 
             # find source from position (closest in catalogue)
             else:
+
                 ra_col = data[cat.columns[2]]
                 dec_col = data[cat.columns[3]]
                 sep_list = []
@@ -283,3 +275,4 @@ class Source:
 
                 self.fluxes = data.iloc[index]
                 self.id = data[data.columns[0]].iloc[index]
+# %%
