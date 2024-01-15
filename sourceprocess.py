@@ -1,4 +1,4 @@
-"""
+u"""
 @author: Clarisse Bonacina
 """
 
@@ -32,6 +32,28 @@ import matplotlib.pyplot as plt
 
 from astropy.coordinates import SkyCoord, FK5
 
+
+def from_m_to_F (F0, m):
+    '''
+    Converts magnitude to flux F (in the units of F0).
+
+    Parameters
+    ----------
+    F0 : float
+        zero magnitude flux
+    m : float
+        magnitude of the source
+    
+    Returns
+    -------
+    F : float
+        flux in the units of F0
+
+    '''
+
+    F = F0*10**(-m/2.5)
+
+    return F
 
 
 def from_deg_to_hmsdms (ra, dec):
@@ -275,4 +297,4 @@ class Source:
 
                 self.fluxes = data.iloc[index]
                 self.id = data[data.columns[0]].iloc[index]
-# %%
+
