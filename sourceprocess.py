@@ -158,7 +158,7 @@ class Catalogue:
     
     def get_data(self, path):
 
-        df = pd.read_csv(path, low_memory=False)
+        df = pd.read_csv(path, low_memory=True)
 
         self.data = df
         self.columns = df.columns
@@ -211,6 +211,7 @@ class Source:
     def __str__(self):
         
         return f'Source(ID: {self.id}, ra: {self.ra}, dec: {self.dec})'
+
 
 
     def get_position(self, cat):
