@@ -38,19 +38,28 @@ import math
 #%% GET CATALOGUES
 
 cat_IRAC = sp.Catalogue('IRAC')
-cat_IRAC.get_data('/Users/claraaldegundemanteca/Desktop/HerschelField/Chris_SPIREdarkfield/catalogues/IRACdarkmatchednoNans.csv') # noNans.csv = nans are turned into 0
+cat_IRAC.get_data('/Users/claraaldegundemanteca/Downloads/HerschelField /Chris_SPIREdarkfield/catalogues/IRACdark-matched_no_Nans.csv') # noNans.csv = nans are turned into 0
+
+#%%
 cat_XID = sp.Catalogue('XID')
-cat_XID.get_data('/Users/claraaldegundemanteca/Desktop/HerschelField/Chris_SPIREdarkfield/catalogues/XIDmultiband.csv')
+cat_XID.get_data('/Users/claraaldegundemanteca/Downloads/HerschelField /Chris_SPIREdarkfield/catalogues/XIDmultiband.csv')
 
+# cat_SCUBA = sp.Catalogue('SCUBA')
+# cat_SCUBA.get_data('/Users/claraaldegundemanteca/Downloads/HerschelField /Deep_field_matches.csv')
 
+#Import SCUBA datafile
+cat_SCUBA = pd.read_csv('/Users/claraaldegundemanteca/Downloads/HerschelField /input_SCUBA.csv', low_memory=True)
+cat_SCUBA = pd.DataFrame(cat_SCUBA)    
 
 # %% Create CIGALE input txt file
 
 
-def CIGALE_input(first_ID, last_ID, outputfile, SPIRE = True):
+def CIGALE_input(ID_list, outputfile, SPIRE = True, SCUBA = False):
     '''
     Produces a dataframe containing the necessary info to perform a fit in CIGALE (id, redshift and fluxes for each filter) and converts is to a .txt file.
     Uses IRAC catalogue 
+    
+    Only use SCUBA  = True for the list of sources with unambiguous detections 
     
     Parameters
     ----------
@@ -63,9 +72,7 @@ def CIGALE_input(first_ID, last_ID, outputfile, SPIRE = True):
         data table containing the info to feed into CIGALE (id, redshift and fluxes for each filter)
     
     '''
-    if SPIRE == False: 
-        ID_list = np.linspace(first_ID, last_ID, num = (last_ID - first_ID)+1)
-        print(ID_list)
+    if SPIRE == False:
         sources = []
         for i in ID_list: 
             source_i = sp.Source(id=i)
@@ -205,9 +212,6 @@ def CIGALE_input(first_ID, last_ID, outputfile, SPIRE = True):
         return d
     
     if SPIRE == True: 
-        
-        ID_list = np.linspace(first_ID, last_ID, num = (last_ID - first_ID)+1)
-        print(ID_list)
         sources = []
         for i in ID_list: 
             source_i = sp.Source(id=i)
@@ -351,7 +355,14 @@ def CIGALE_input(first_ID, last_ID, outputfile, SPIRE = True):
                                             'MIPS1', 'MIPS1_err','MIPS2', 'MIPS2_err', 
                                             'S11', 'S11_err', 'L15', 'L15_err', 'L18W', 'L18W_err',
                                             'u_prime', 'u_prime_err', 'g_prime', 'g_prime_err', 'r_prime', 'r_prime_err', 'z_prime', 'z_prime_err'])
-       
+        
+        if SCUBA == True: 
+            df ['SCUBA850'] = cat_SCUBA['SCUBA850']
+            df ['SCUBA850_err'] = cat_SCUBA['SCUBA850_err']
+            df ['SCUBA450'] = cat_SCUBA['SCUBA450']
+            df ['SCUBA450_err'] = cat_SCUBA['SCUBA450_err']
+
+
         # check for duplicates
         df_2 = df.drop_duplicates(subset=['id'], keep='first')
         
@@ -376,11 +387,8 @@ def CIGALE_input(first_ID, last_ID, outputfile, SPIRE = True):
 
 #%% Create CIGALE file for FULL list 
 
-df = CIGALE_input(0,8000, outputfile='/Users/claraaldegundemanteca/Desktop/CIGALE/cigale-v2022.1/input_noSPIRE.txt', SPIRE = False)
+df = CIGALE_input((3, 4, 5, 12, 14,20,21,22,24,25,26,27,28,29,33), outputfile='/Users/claraaldegundemanteca/Downloads/cigale-v2022.1/input_SCUBA_withSPIRE.txt', SPIRE = True, SCUBA=True)
 
 # Comment if we want to use the z in the catalogue
-df ['redshift'] = -1
-
-
-
+#df ['redshift'] = -1
 
