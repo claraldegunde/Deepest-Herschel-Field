@@ -1,0 +1,161 @@
+# %%
+
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+
+# %%
+
+def generate_df (output_file):
+    '''
+    Generates a dataframe out of the CIGALE result.txt and observations.txt file
+
+    Returns
+    -------
+    Pandas DataFrame
+    '''
+    output_data = pd.read_csv(output_file)
+    #Create dataframe
+    headers = output_data.columns[0]
+    headers = headers.split(" ")
+    headers_list = []
+    for i in headers:
+        # print(i)
+        if i != '':
+            headers_list.append(i)
+       
+    values_list = np.zeros([len(output_data), len(headers_list)])
+    for i in range (0, len(output_data)): #scans through all sources
+        values = output_data[output_data.columns[0]][i]
+        values = values.split(" ")
+        useful_values = []
+
+        for j in values: # scans through values for the different variables
+            # print(i)
+            if j != '':
+                useful_values.append(j)
+
+        values_list [i, :] = useful_values
+        
+    return pd.DataFrame(data = values_list, columns = headers_list) #Dataframe created
+
+# %%
+
+df_sedparams = generate_df('out_JWST_sources_withSPIRE/results.txt')
+df_sedparams.rename({'id': 'ID'}, axis=1, inplace=True)
+df_sedparams["ID"] = df_sedparams.ID.astype(int)
+
+df_sersic = pd.read_csv('sersic_parameters.txt', delim_whitespace=True)
+
+df = df_sedparams.merge(df_sersic, how='outer', on='ID')
+df = df.dropna(axis=0)
+
+# %%
+
+plt.hist(df_sersic['n'], bins=25, color='tomato')
+plt.xlabel('Sersic index')
+plt.show()
+
+#%%
+
+plt.scatter(df['n'], df['bayes.universe.redshift'], marker='+', color='tomato')
+plt.xlabel('Sersic index')
+plt.ylabel('z')
+plt.show()
+
+# %%
+
+plt.scatter(df['n'], df['bayes.sfh.sfr'], marker='+', color='tomato')
+plt.xlabel('Sersic index')
+plt.ylabel('sfr')
+plt.show()
+
+# %%
+plt.scatter(df['n'], df['bayes.stellar.m_star'], marker='+', color='tomato')
+plt.xlabel('Sersic index')
+plt.ylabel('stellar mass')
+plt.show()
+
+# %%
+
+plt.scatter(df['Ellipticity'], df['bayes.universe.redshift'], marker='+', color='tomato')
+plt.xlabel('ellipticity')
+plt.ylabel('z')
+plt.show()
+
+# %%
+
+plt.scatter(df['Ellipticity'], df['bayes.sfh.sfr'], marker='+', color='tomato')
+plt.xlabel('ellipticity')
+plt.ylabel('sfr')
+plt.show()
+
+# %%
+
+plt.hist(df['Ellipticity'], bins=25, color='tomato')
+plt.xlabel('Ellipticity')
+plt.show()
+
+
+
+# %%
+
+plt.scatter(df['bayes.universe.redshift'], np.log10(df['bayes.sfh.sfr']), marker='+', color='tomato')
+plt.xlabel('z')
+plt.ylabel('sfr')
+plt.show()
+
+# %%
+
+plt.scatter(df['Ellipticity'], np.log10(df['bayes.stellar.m_star']), marker='+', color='tomato')
+plt.xlabel('ellipticity')
+plt.ylabel('stellar mass')
+plt.show()
+
+# %%
+
+plt.scatter(df['n'], df['r_eff'], marker='+', color='tomato')
+plt.xlabel('Sersic index')
+plt.ylabel('r_eff')
+plt.show()
+
+# %%
+
+plt.scatter(df['n'], df['Ellipticity'], marker='+', color='tomato')
+plt.xlabel('Sersic index')
+plt.ylabel('ellipticity')
+plt.show()
+
+# %%
+
+# relation between bulge surface brightness (magnitude?) and r_e
+
+df_IRAC = pd.read_csv('IRACdark-matched.csv')
+
+ids = df['ID'].to_numpy()
+df_IRAC = df_IRAC.loc[df_IRAC['num'].isin(ids)]
+
+df = df.merge(df_IRAC, how='outer', left_on='ID', right_on='num')
+
+# %%
+
+# select galaxies with n<2
+galbelow = df[df['n'] < 2]
+galabove = df[df['n'] >= 2]
+
+plt.scatter(np.log10(galbelow['r_eff']), galbelow['acsmag'], marker='.', color='tomato', label='n<2')
+plt.scatter(np.log10(galabove['r_eff']), galabove['acsmag'], marker='.', color='cornflowerblue', label='n>2')
+plt.plot(np.log10(df['r_eff']), 13.95 + 1.74*np.log10(df['r_eff']), color='black', linewidth=1, label='Gadotti 2009?')
+plt.plot()
+plt.xlabel('r_eff')
+plt.ylabel('m')
+plt.gca().invert_yaxis()
+plt.ylim((30,14))
+plt.legend()
+plt.show()
+
+# solid line is fit to elliptical galaxies
+# disk buldge galaxies fall below that boundary
+# (Sersic index is not always a good mean of classification)
+
+# %%
