@@ -41,19 +41,43 @@ def generate_df (output_file):
 
 # %%
 
-df_sedparams = generate_df('out_JWST_sources_withSPIRE/results.txt')
-df_sedparams.rename({'id': 'ID'}, axis=1, inplace=True)
-df_sedparams["ID"] = df_sedparams.ID.astype(int)
+# use JWST results file
+df_sedparams_JWST = generate_df('out_JWST_sources_withSPIRE/results.txt')
+df_sedparams_JWST.rename({'id': 'ID'}, axis=1, inplace=True)
+df_sedparams_JWST["ID"] = df_sedparams_JWST.ID.astype(int)
+df_sersic_JWST = pd.read_csv('sersic_parameters.txt', delim_whitespace=True)
+df_JWST = df_sedparams_JWST.merge(df_sersic_JWST, how='outer', on='ID')
+df_JWST = df_JWST.dropna(axis=0)
+df_JWST['telescope'] = ['JWST'] * 27
 
-df_sersic = pd.read_csv('sersic_parameters.txt', delim_whitespace=True)
+# use HST results file
+df_sedparams_HST = generate_df('results.txt')
+df_sedparams_HST.rename({'id': 'ID'}, axis=1, inplace=True)
+df_sedparams_HST["ID"] = df_sedparams_HST.ID.astype(int)
+df_sersic_HST = pd.read_csv('HST_sersic_parameters.txt', delim_whitespace=True)
+df_HST = df_sedparams_HST.merge(df_sersic_HST, how='outer', on='ID')
+df_HST = df_HST.dropna(axis=0)
+df_HST['telescope'] = ['HST'] * 23
 
-df = df_sedparams.merge(df_sersic, how='outer', on='ID')
-df = df.dropna(axis=0)
+df = pd.concat([df_JWST, df_HST], axis=0)
 
 # %%
 
-plt.hist(df_sersic['n'], bins=25, color='tomato')
-plt.xlabel('Sersic index')
+# SERSIC INDEX DISTRIBUTION IN THE FIELD
+
+plt.rcParams['font.serif'] = "Arial"
+plt.rcParams['font.family'] = "Sans serif"
+plt.rcParams['font.size'] = 14
+
+plt.hist(df['n'], bins=np.linspace(0,10,20), color="#97FEED", edgecolor='k', alpha = 0.7)
+#plt.hist(df_JWST['n'], bins=np.linspace(0,10,20), color="tomato", edgecolor='k', alpha = 0.7, label='JWST')
+#plt.hist(df_HST['n'], bins=np.linspace(0,10,20), color="mediumseagreen", edgecolor='k', alpha = 0.7, label='HST')
+plt.ylabel('Frequency')
+plt.xlabel(r'$n$')
+plt.tick_params(direction='in',top=True,right=True,which='both')
+#plt.legend(facecolor = 'k', framealpha = 0.1)
+#plt.gca().set_aspect('equal')
+plt.savefig('sersicdist.png', dpi=300)
 plt.show()
 
 #%%
@@ -128,34 +152,127 @@ plt.show()
 
 # %%
 
+JWST_disk = [17721, 576, 9614,498, 8702,1422] 
+JWST_spheroid = [650, 645, 1629, 590, 2388, 2102, 415, 445, 577] 
+JWST_disk_spheroid = [1421, 444, 395, 2100,2198,605, 494, 360, 396, 2303, 543, 552, 596, 403] 
+JWST_irregular = [66822, 554, 29359 ] 
+JWST_interacting = [9584, 2199, 8892, 43374, 28670, 414] 
+HST_disk = [1826,15681,  16224, 83963, 86174  ] 
+HST_spheroid = [15002,15404,  16562, 86687 ] 
+HST_disk_spheroid = [1145, 1256, 1258, 2007, 2010,  2612, 2941, 36282, ] 
+HST_irregular = [1265,  1830, 2006, ] 
+HST_interacting = [2367, 2503, 79198,  ] 
+
+morpho_ids = [JWST_disk, JWST_spheroid, JWST_disk_spheroid, JWST_irregular, JWST_interacting, HST_disk, HST_spheroid, HST_disk_spheroid, HST_irregular, HST_interacting]
+morpho_strs = ['disk', 'spheroid', 'disk spheroid', 'irregular', 'interacting', 'disk', 'spheroid', 'disk spheroid', 'irregular', 'interacting']
+morpho_num = [1, 2, 3, 4, 5, 1, 2, 3, 4, 5] #for plotting
+
+for i in range(0,len(morpho_ids)):
+    df.loc[df['ID'].isin(morpho_ids[i]), 'morphology'] = morpho_strs[i]
+    df.loc[df['ID'].isin(morpho_ids[i]), 'morphonum'] = morpho_num[i]
+
+# %%
+
+# MORPHOLOGY DISTRIBUTION 
+    
+hist, bins = np.histogram(df['morphonum'].dropna(), bins=[0.5,1.5,2.5,3.5,4.5,5.5])
+
+plt.hist(df['morphonum'], bins=bins, color="#97FEED", edgecolor='k', alpha = 0.7)
+plt.ylabel('Frequency')
+x = [1, 2, 3, 4, 5]
+labels = ['disk', 'spheroid', 'disk-spheroid', 'irregular', 'interacting']
+plt.xticks(x, labels, rotation=45)
+plt.tick_params(direction='in',top=True,right=True,which='both')
+#plt.gca().set_aspect('equal')
+plt.savefig('morphodist.png', dpi=300)
+plt.show()
+
+# %%
+
+# put the two histograms together
+
+# %%
+
+# %%
+
 # relation between bulge surface brightness (magnitude?) and r_e
 
 df_IRAC = pd.read_csv('IRACdark-matched.csv')
-
 ids = df['ID'].to_numpy()
 df_IRAC = df_IRAC.loc[df_IRAC['num'].isin(ids)]
-
 df = df.merge(df_IRAC, how='outer', left_on='ID', right_on='num')
 
 # %%
 
-# select galaxies with n<2
+fig = plt.figure(figsize=(6,6))
+
 galbelow = df[df['n'] < 2]
 galabove = df[df['n'] >= 2]
-
-plt.scatter(np.log10(galbelow['r_eff']), galbelow['acsmag'], marker='.', color='tomato', label='n<2')
-plt.scatter(np.log10(galabove['r_eff']), galabove['acsmag'], marker='.', color='cornflowerblue', label='n>2')
-plt.plot(np.log10(df['r_eff']), 13.95 + 1.74*np.log10(df['r_eff']), color='black', linewidth=1, label='Gadotti 2009?')
-plt.plot()
-plt.xlabel('r_eff')
-plt.ylabel('m')
+disk = df[df['morphology'] == 'disk']
+spher = df[df['morphology'] == 'spheroid']
+diskspher = df[df['morphology'] == 'disk spheroid']
+irreg = df[df['morphology'] == 'irregular']
+inter = df[df['morphology'] == 'interacting']
+#plt.scatter(np.log10(galbelow['r_eff']), galbelow['acsmag'], marker='.', color='tomato', label='n<2')
+#plt.scatter(np.log10(galabove['r_eff']), galabove['acsmag'], marker='.', color='cornflowerblue', label='n>2')
+#plt.scatter(np.log10(disk['r_eff']), disk['acsmag'], marker='o', color="#009E73", edgecolor="#009E73", alpha=0.7, label='disk')
+#plt.scatter(np.log10(spher['r_eff']), spher['acsmag'], marker='o', color="#882255", edgecolor="#882255", alpha=0.7, label='spheroid')
+#plt.scatter(np.log10(diskspher['r_eff']), diskspher['acsmag'], marker='o', color="tomato", edgecolor="tomato", alpha=0.7, label='diskspheroid')
+#plt.scatter(np.log10(irreg['r_eff']), irreg['acsmag'], marker='o', color="mediumseagreen", edgecolor="mediumseagreen", alpha=0.7, label='irregular')
+#plt.scatter(np.log10(inter['r_eff']), inter['acsmag'], marker='o', color="mediumpurple", edgecolor="mediumpurple", alpha=0.7, label='interacting')
+plt.scatter(np.log10(df['r_eff']), df['acsmag'], marker='o', color="#97FEED", edgecolor="black", alpha=0.7)
+x = np.linspace(0,6,10)
+plt.plot(x, 13.95 + 1.74*x, color='black', linewidth=1, label='Elliptical')
+plt.plot(x, 12.95 + 1.74*x, color='black', linewidth=1, linestyle='dashed')
+plt.plot(x, 14.95 + 1.74*x, color='black', linewidth=1, linestyle='dashed')
+plt.tick_params(direction='in',top=True,right=True,which='both')
+plt.xlabel(r'log $R_e$')
+plt.ylabel(r'i-mag')
 plt.gca().invert_yaxis()
+plt.xlim(0.2,5)
 plt.ylim((30,14))
-plt.legend()
-plt.show()
+plt.legend(facecolor = 'k', framealpha = 0.1)
+fig.savefig('diskbuldge.png', dpi=300)
+fig.show()
 
 # solid line is fit to elliptical galaxies
 # disk buldge galaxies fall below that boundary
 # (Sersic index is not always a good mean of classification)
+# %%
 
+# Sersic profile plot
+
+fig = plt.figure(figsize=(6,6))
+
+def Sersic_profile(Ie, r, n, r_e):
+    bn = 2*n - 1/3 + 4/(405*n) +  46/(25515*n*n) + 131/(1148175*n*n*n) - 2194697/(30690717750*n*n*n*n)
+    arg = (r/r_e)**(-1/n) - 1
+    I = Ie * np.exp( - bn * arg)
+    return I
+
+r_e_arr = np.linspace(0.1,1000,500)
+Iell = Sersic_profile(Ie=5e-2, r=100, n=4, r_e=r_e_arr)
+Ispir = Sersic_profile(Ie=5e-2, r=100, n=1, r_e=r_e_arr)
+Itest1 = Sersic_profile(Ie=5e-2, r=100, n=10, r_e=r_e_arr)
+Itest2 = Sersic_profile(Ie=5e-2, r=100, n=2, r_e=r_e_arr)
+Itest3 = Sersic_profile(Ie=5e-2, r=100, n=6, r_e=r_e_arr)
+Itest4 = Sersic_profile(Ie=5e-2, r=100, n=8, r_e=r_e_arr)
+plt.plot(np.log(r_e_arr), np.log(Ispir), label='Spiral', color='#9EDE73', linewidth=1.5)
+plt.plot(np.log(r_e_arr), np.log(Itest2), color='black', linewidth=1, linestyle='dashed')
+plt.plot(np.log(r_e_arr), np.log(Iell), label='Elliptical', color='#FFC600', linewidth=1.5)
+#plt.plot(np.log(r_e_arr), np.log(Itest3), color='black', linewidth=1, linestyle='dashed')
+#plt.plot(np.log(r_e_arr), np.log(Itest4), color='black', linewidth=1, linestyle='dashed')
+plt.plot(np.log(r_e_arr), np.log(Itest1), color='black',  linewidth=1, linestyle='dashed')
+#plt.plot(np.log(r_e_arr), np.log(Itest2), label='6')
+plt.xlim(2,6)
+plt.ylim(-8,2)
+plt.legend(facecolor = 'k', framealpha = 0.1)
+plt.tick_params(direction='in',top=True,right=True,which='both', labelbottom=False, labelleft=False)
+plt.xlabel(r'Log $R_e$')
+plt.ylabel(r'log $I(R_e)$')
+plt.annotate(r'$n=1$', (3,-2.5), color='#9EDE73')
+plt.annotate(r'$n=4$', (3.6,-0.5), color='#FFC600')
+
+fig.savefig('Sersicprofiles.png', dpi=300)
+fig.show()
 # %%
